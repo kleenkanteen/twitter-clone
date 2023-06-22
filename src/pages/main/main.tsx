@@ -9,6 +9,7 @@ export interface Post {
   title: string;
   username: string;
   description: string;
+  downloadURL?: string;
 }
 
 export const Main = () => {

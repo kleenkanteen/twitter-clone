@@ -23,6 +23,7 @@ interface Like {
 
 export const Post = (props: Props) => {
   const { post } = props;
+  console.log(post);
   const [user] = useAuthState(auth);
 
   const [likes, setLikes] = useState<Like[] | null>(null);
@@ -57,6 +58,7 @@ export const Post = (props: Props) => {
 
   const removeLike = async () => {
     try {
+      console.log(`post id: ${post.id} user id: ${user?.uid}`)
       const likeToDeleteQuery = query(
         likesRef,
         where("postId", "==", post.id),
@@ -65,6 +67,7 @@ export const Post = (props: Props) => {
 
       const likeToDeleteData = await getDocs(likeToDeleteQuery);
       const likeId = likeToDeleteData.docs[0].id;
+      console.log(likeToDeleteData.docs[0].data());
       const likeToDelete = doc(db, "likes", likeId);
       await deleteDoc(likeToDelete);
       if (user) {
@@ -88,10 +91,15 @@ export const Post = (props: Props) => {
       <div className="title">
         <h1> {post.title}</h1>
       </div>
+
+      <div>
+        <img className="image" src={post?.downloadURL} />
+      </div>
+
       <div className="body">
         <p> {post.description} </p>
       </div>
-
+      
       <div className="footer">
         <p> @{post.username} </p>
         <button onClick={hasUserLiked ? removeLike : addLike}>

@@ -84,3 +84,7 @@ textarea {
 .submitForm:hover {
   cursor: pointer;
 }
+
+.image {
+  max-width: 50%;
+}

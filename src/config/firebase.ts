@@ -1,18 +1,19 @@
 // Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
+import { initializeApp } from "firebase/app";
+// Import the functions you need from the SDKs you need
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyB5v3fPuvXb1ojm0J9ubwVP64-3HK2ic8Y",
-  authDomain: "react-course-48f64.firebaseapp.com",
-  projectId: "react-course-48f64",
-  storageBucket: "react-course-48f64.appspot.com",
-  messagingSenderId: "882013883752",
-  appId: "1:882013883752:web:31666282cf06bdb15cdadd",
+  apiKey: "AIzaSyDyWZ0q0X7VJRSVcpZLzvEQSCBo5-s6RS0",
+  authDomain: "learn-react-e4942.firebaseapp.com",
+  projectId: "learn-react-e4942",
+  storageBucket: "learn-react-e4942.appspot.com",
+  messagingSenderId: "811720628070",
+  appId: "1:811720628070:web:1972e1cedea1385a709aa7"
 };
 
 // Initialize Firebase
