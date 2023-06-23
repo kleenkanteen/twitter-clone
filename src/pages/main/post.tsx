@@ -1,16 +1,17 @@
 import {
   addDoc,
-  getDocs,
   collection,
-  query,
-  where,
   deleteDoc,
   doc,
+  getDocs,
+  query,
+  where,
 } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { db, auth } from "../../config/firebase";
+import { auth, db } from "../../config/firebase";
 import { Post as IPost } from "./main";
+import { set } from "react-hook-form";
 
 interface Props {
   post: IPost;
@@ -21,6 +22,12 @@ interface Like {
   userId: string;
 }
 
+interface Comment {
+  postId: string;
+  comment: string;
+  name: string;
+}
+
 export const Post = (props: Props) => {
   const { post } = props;
   console.log(post);
@@ -29,10 +36,15 @@ export const Post = (props: Props) => {
   const [likes, setLikes] = useState<Like[] | null>(null);
 
   const likesRef = collection(db, "likes");
-
   const likesDoc = query(likesRef, where("postId", "==", post.id));
 
+  useEffect(() => {
+    getLikes();
+    getComments();
+  }, []);
+
   const getLikes = async () => {
+
     const data = await getDocs(likesDoc);
     setLikes(
       data.docs.map((doc) => ({ userId: doc.data().userId, likeId: doc.id }))
@@ -82,12 +94,57 @@ export const Post = (props: Props) => {
 
   const hasUserLiked = likes?.find((like) => like.userId === user?.uid);
 
-  useEffect(() => {
-    getLikes();
-  }, []);
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [comment, setComment] = useState<string>("");
+
+  const commentsRef = collection(db, "comments");
+  const commentsDoc = query(commentsRef, where("postId", "==", post.id));
+
+  const getComments = async () => {
+    const commentsQuery = query(commentsRef, where("postId", "==", post.id));
+    const commentsSnapshot = await getDocs(commentsQuery);
+    const commentsData = commentsSnapshot.docs.map((doc) => doc.data());
+    console.log(`full doc.data() object: ${commentsData[0]}`)
+    const comments = commentsData.map((commentData) => ({
+      postId: commentData.postId,
+      comment: commentData.comment,
+      name: commentData.name
+    }));
+    setComments(comments);
+  };
+
+
+  // add useeffect hook to rerender comments component
+  // create separate comments component
+
+
+
+  const addComment = async (postId: string, comment: string, name: string) => {
+    // send a post request firebase to save comment in the comments collection
+    try {
+    await addDoc(commentsRef, {
+      postId: postId,
+      comment: comment,
+      name: name
+    });
+    // add to comments state variable
+    setComments((comments) => ([
+      ...comments,
+      {
+        postId: postId,
+        comment: comment,
+        name: name
+      }
+    ]))
+  }
+  catch (err) {
+    console.log(err)
+  }
+  };
+
 
   return (
-    <div>
+    <div className="main">
       <div className="title">
         <h1> {post.title}</h1>
       </div>
@@ -107,6 +164,20 @@ export const Post = (props: Props) => {
         </button>
         {likes && <p> Likes: {likes?.length} </p>}
       </div>
+
+      <div>
+        {comments?.map((comment: Comment) => (
+          <div>{`${comment.name}: ${comment.comment}`}</div>
+        ))
+        }
+      </div>
+
+      {auth &&
+      <div className="comment">
+        <textarea onChange={(e) => setComment(e.target.value)} placeholder="Comment..."></textarea>
+        <button onClick={() => addComment(post.id, comment, auth?.currentUser?.displayName ?? "")}> Post </button>
+      </div>
+      }
     </div>
   );
 };
