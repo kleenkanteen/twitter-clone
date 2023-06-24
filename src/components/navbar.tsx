@@ -12,11 +12,14 @@ export const Navbar = () => {
   return (
     <div className="navbar">
       <div className="links">
-        <Link to="/"> Home </Link>
         {!user ? (
           <Link to="/login"> Login </Link>
         ) : (
+          <>
+          <Link to="/homefeed"> Home Feed </Link>
+          <Link to="/"> All Posts </Link>
           <Link to="/createpost"> Create Post </Link>
+          </>
         )}
       </div>
       <div className="user">

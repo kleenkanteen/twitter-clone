@@ -12,8 +12,9 @@ function App() {
       <Router>
         <Navbar />
         <Routes>
-          <Route path="/" element={<Main />} />
+          <Route path="/" element={<Main home={false} />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/homefeed" element={<Main home={true} />} />
           <Route path="/createpost" element={<CreatePost />} />
         </Routes>
       </Router>

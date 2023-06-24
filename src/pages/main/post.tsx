@@ -104,7 +104,7 @@ export const Post = (props: Props) => {
     const commentsQuery = query(commentsRef, where("postId", "==", post.id));
     const commentsSnapshot = await getDocs(commentsQuery);
     const commentsData = commentsSnapshot.docs.map((doc) => doc.data());
-    console.log(`full doc.data() object: ${commentsData[0]}`)
+    // console.log(`full doc.data() object: ${commentsData[0]}`)
     const comments = commentsData.map((commentData) => ({
       postId: commentData.postId,
       comment: commentData.comment,
@@ -172,7 +172,7 @@ export const Post = (props: Props) => {
         }
       </div>
 
-      {auth &&
+      {auth.currentUser &&
       <div className="comment">
         <textarea onChange={(e) => setComment(e.target.value)} placeholder="Comment..."></textarea>
         <button onClick={() => addComment(post.id, comment, auth?.currentUser?.displayName ?? "")}> Post </button>
