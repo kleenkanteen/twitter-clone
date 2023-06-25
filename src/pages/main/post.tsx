@@ -41,6 +41,7 @@ export const Post = (props: Props) => {
   useEffect(() => {
     getLikes();
     getComments();
+    getFollowStatus();
   }, []);
 
   const getLikes = async () => {
@@ -55,7 +56,7 @@ export const Post = (props: Props) => {
       const newDoc = await addDoc(likesRef, {
         userId: user?.uid,
         postId: post.id,
-      });
+      }); 
       if (user) {
         setLikes((prev) =>
           prev
@@ -114,11 +115,6 @@ export const Post = (props: Props) => {
   };
 
 
-  // add useeffect hook to rerender comments component
-  // create separate comments component
-
-
-
   const addComment = async (postId: string, comment: string, name: string) => {
     // send a post request firebase to save comment in the comments collection
     try {
@@ -136,12 +132,68 @@ export const Post = (props: Props) => {
         name: name
       }
     ]))
-  }
-  catch (err) {
-    console.log(err)
-  }
+    }
+    catch (err) {
+      console.log(err)
+    }
   };
+  
+  const [following, setFollowing] = useState(false);
+  const followingRef = collection(db, "following");
 
+  const getFollowStatus = async () => {
+    try {
+      const unfollowQuery = query(
+          followingRef,
+        where("FollowerUserId", "==", user?.uid),
+        where("FollowingUserId", "==", post?.userId)
+      );
+      const unfollowSnapshot = await getDocs(unfollowQuery);
+      setFollowing(!unfollowSnapshot.empty)
+    }
+    catch (err) {
+      console.log(err)
+    }
+  }
+
+  const follow = async () => {
+    // get current user Id and Id of the author, send both to firebase
+    try {
+      console.log(`${post.userId} AND ${user?.uid}`)
+      await addDoc(followingRef,{
+        FollowingUserId: post.userId,
+        FollowerUserId: user?.uid
+      }
+      )
+      setFollowing(true);
+    }
+    catch (err) {
+      console.log(err)
+    }
+  }
+
+  const unfollow = async () => {
+    // get current user Id and Id of the author, send both to firebase
+    try {
+      const unfollowQuery = query(
+        followingRef,
+        where("FollowerUserId", "==", user?.uid),
+        where("FollowingUserId", "==", post.userId)
+      );
+
+      const unfollowData = await getDocs(unfollowQuery);
+      console.log("UNFOLLOW DATA", unfollowData);
+      const unfollowId = unfollowData.docs[0].id;
+      const unfollowToDelete = doc(db, "following", unfollowId);
+      await deleteDoc(unfollowToDelete);
+    
+      setFollowing(false);
+    }
+
+    catch (err) {
+      console.log(err)
+    }
+  }
 
   return (
     <div className="main">
@@ -158,7 +210,10 @@ export const Post = (props: Props) => {
       </div>
       
       <div className="footer">
-        <p> @{post.username} </p>
+        <div>
+          <span> @{post.username} </span>
+          <button onClick={following ? unfollow : follow}>{following ? <>Unfollow</> : <>Follow</> }</button>
+        </div>
         <button onClick={hasUserLiked ? removeLike : addLike}>
           {hasUserLiked ? <>&#128078;</> : <>&#128077;</>}{" "}
         </button>

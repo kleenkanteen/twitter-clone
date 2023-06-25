@@ -26,64 +26,74 @@ export interface Follow {
 }
 
 export const Main = ({ home }: { home: boolean }) => {
+  const [user, loading] = useAuthState(auth);
+
   const [postsList, setPostsList] = useState<Post[] | null>(null);
   const [followingList, setFollowingList] = useState<string[] | null>(null);
-  const [user] = useAuthState(auth);
 
-  console.log(`goign home is ${home}`);
+  // console.log(`goign home is ${home}`);
   
-  const postsRef = collection(db, "posts");
-  let data: any;
-  console.log(`current user is ${user?.displayName} + ${user?.uid} wants`)
   const getPosts = async () => {
-    console.log("get posts");
-    console.log(`looking for just posts user ${user?.displayName} wants`);
+    const postsRef = collection(db, "posts");
+    let data: any;
+    console.log(`current user is ${user?.displayName} ID is ${user?.uid}`)
 
     if (!home) {
       console.log("looking for all posts");
       data = await getDocs(postsRef);
-
-    } else {
+    } 
+    else {
       if (!user) {
         console.log("home feed cannot show if not logged in");
         return;
       }
-      
       console.log("home feed only");
       const followingRef = collection(db, "following");
-      console.log(`current user ID is ${user?.uid}`);
+      // console.log(`current user ID is ${user?.uid}`);
       const followerQuery = query(followingRef, where("FollowerUserId", "==", user?.uid));
-      const followingData: any = await getDocs(followerQuery);
-  
-      console.log(`following userID ${followingData.docs[0].data().FollowingUserId}`);
-      const followingPromises = await followingData.docs.map(async (doc: any) => {
+      const followingSnapshot: any = await getDocs(followerQuery);
+
+      if (!followingSnapshot.empty) {
+      // console.log(`following userID ${followingData.docs[0].data().FollowingUserId}`);
+      const followingPromises = await followingSnapshot.docs.map(async (doc: any) => {
         console.log(`following userID ${doc.data().FollowingUserId}`);
         return doc.data().FollowingUserId;
       });
-  
+
       const resolvedFollowingList = await Promise.all(followingPromises);
       setFollowingList(await followingPromises);
-  
+
       console.log(`Following list is ${resolvedFollowingList}`);
       if (!resolvedFollowingList) return;
       const SubscribedPosts = query(postsRef, where("userId", "in", resolvedFollowingList));
       data = await getDocs(SubscribedPosts);
+    }
     };
   
     setPostsList(
-      data.docs.map((doc: any) => ({ ...doc.data(), id: doc.id })) as Post[]
+      data?.docs.map((doc: any) => ({ ...doc.data(), id: doc.id })) as Post[]
     );
   };
   
   useEffect(() => {
-    getPosts();
-  }, [home]);
+    if (user) getPosts();
+  }, [home, user]);
 
+  if (loading) return <div>Loading</div>
+  
   return (
-    <div>
-      {postsList?.map((post) => (
-        <Post post={post} />
-      ))}
-    </div>
+    <>
+      {!postsList && home ? (
+        <div>
+          You follow no one
+        </div>
+      ) : null}
+      <div>
+        {postsList?.map((post) => (
+          <Post post={post} key={post.id} />
+        ))
+        }
+      </div>
+    </>
   );
-};
+}
