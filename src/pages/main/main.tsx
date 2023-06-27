@@ -90,7 +90,7 @@ export const Main = ({ home }: { home: boolean }) => {
       ) : null}
       <div>
         {postsList?.map((post) => (
-          <Post post={post} key={post.id} />
+          <Post post={post} key={post.id} postsList={postsList} setPostsList={setPostsList} />
         ))
         }
       </div>

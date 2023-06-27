@@ -15,6 +15,8 @@ import { set } from "react-hook-form";
 
 interface Props {
   post: IPost;
+  postsList: IPost[] | null;
+  setPostsList: React.Dispatch<React.SetStateAction<IPost[] | null>>;
 }
 
 interface Like {
@@ -23,14 +25,19 @@ interface Like {
 }
 
 interface Comment {
+  commentId: string,
   postId: string;
   comment: string;
   name: string;
+  userId: string;
 }
 
 export const Post = (props: Props) => {
+  const [isLoading, setIsLoading] = useState(true);
+
   const { post } = props;
-  console.log(post);
+  // console.log(post);
+  const [postsList, setPostsList] = [props.postsList, props.setPostsList]
   const [user] = useAuthState(auth);
 
   const [likes, setLikes] = useState<Like[] | null>(null);
@@ -40,7 +47,7 @@ export const Post = (props: Props) => {
 
   useEffect(() => {
     getLikes();
-    getComments();
+    getComments().then(() => setIsLoading(false));
     getFollowStatus();
   }, []);
 
@@ -71,7 +78,7 @@ export const Post = (props: Props) => {
 
   const removeLike = async () => {
     try {
-      console.log(`post id: ${post.id} user id: ${user?.uid}`)
+      // console.log(`post id: ${post.id} user id: ${user?.uid}`)
       const likeToDeleteQuery = query(
         likesRef,
         where("postId", "==", post.id),
@@ -80,7 +87,7 @@ export const Post = (props: Props) => {
 
       const likeToDeleteData = await getDocs(likeToDeleteQuery);
       const likeId = likeToDeleteData.docs[0].id;
-      console.log(likeToDeleteData.docs[0].data());
+      // console.log(likeToDeleteData.docs[0].data());
       const likeToDelete = doc(db, "likes", likeId);
       await deleteDoc(likeToDelete);
       if (user) {
@@ -98,10 +105,9 @@ export const Post = (props: Props) => {
   const [comments, setComments] = useState<Comment[]>([]);
   const [comment, setComment] = useState<string>("");
 
-  const commentsRef = collection(db, "comments");
-  const commentsDoc = query(commentsRef, where("postId", "==", post.id));
 
   const getComments = async () => {
+    const commentsRef = collection(db, "comments");
     const commentsQuery = query(commentsRef, where("postId", "==", post.id));
     const commentsSnapshot = await getDocs(commentsQuery);
     const commentsData = commentsSnapshot.docs.map((doc) => doc.data());
@@ -109,7 +115,9 @@ export const Post = (props: Props) => {
     const comments = commentsData.map((commentData) => ({
       postId: commentData.postId,
       comment: commentData.comment,
-      name: commentData.name
+      commentId: commentData.commentId,
+      name: commentData.name,
+      userId: commentData.userId,
     }));
     setComments(comments);
   };
@@ -117,27 +125,40 @@ export const Post = (props: Props) => {
 
   const addComment = async (postId: string, comment: string, name: string) => {
     // send a post request firebase to save comment in the comments collection
+    const commentsRef = collection(db, "comments");
     try {
-    await addDoc(commentsRef, {
-      postId: postId,
-      comment: comment,
-      name: name
-    });
-    // add to comments state variable
-    setComments((comments) => ([
-      ...comments,
-      {
+      const commentSnapshot = await addDoc(commentsRef, {
         postId: postId,
         comment: comment,
-        name: name
-      }
-    ]))
+        name: name,
+        userId: user?.uid
+      });
+
+      if (!user) return 
+      // add to comments state variable
+      setComments((comments) => ([
+        ...comments,
+        {
+          postId: postId,
+          comment: comment,
+          commentId: commentSnapshot.id, 
+          name: name,
+          userId: user.uid
+        }
+      ]))
     }
     catch (err) {
       console.log(err)
     }
   };
   
+  const deleteComment = (commentId: string) => {
+    const commentsRef = collection(db, "comments");
+    console.log(`db is ${db} and ${commentId}`)
+    deleteDoc(doc(db, "comments", commentId));
+    setComments((prev) => prev && prev.filter((thing) => thing.commentId !== commentId))
+  }
+
   const [following, setFollowing] = useState(false);
   const followingRef = collection(db, "following");
 
@@ -159,7 +180,7 @@ export const Post = (props: Props) => {
   const follow = async () => {
     // get current user Id and Id of the author, send both to firebase
     try {
-      console.log(`${post.userId} AND ${user?.uid}`)
+      // console.log(`${post.userId} AND ${user?.uid}`)
       await addDoc(followingRef,{
         FollowingUserId: post.userId,
         FollowerUserId: user?.uid
@@ -182,7 +203,7 @@ export const Post = (props: Props) => {
       );
 
       const unfollowData = await getDocs(unfollowQuery);
-      console.log("UNFOLLOW DATA", unfollowData);
+      // console.log("UNFOLLOW DATA", unfollowData);
       const unfollowId = unfollowData.docs[0].id;
       const unfollowToDelete = doc(db, "following", unfollowId);
       await deleteDoc(unfollowToDelete);
@@ -195,9 +216,18 @@ export const Post = (props: Props) => {
     }
   }
 
+  const deletePost = () => {
+    deleteDoc(doc(db, "posts", post.id));
+    setPostsList((prev) => prev && prev.filter((thing) => thing.id !== post.id))
+  }
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <div className="main">
-      <div className="title">
+      <div className="title red">
         <h1> {post.title}</h1>
       </div>
 
@@ -212,17 +242,23 @@ export const Post = (props: Props) => {
       <div className="footer">
         <div>
           <span> @{post.username} </span>
-          <button onClick={following ? unfollow : follow}>{following ? <>Unfollow</> : <>Follow</> }</button>
+          { post.userId !== user?.uid && <button onClick={following ? unfollow : follow}>{following ? <>Unfollow</> : <>Follow</> }</button>}
         </div>
-        <button onClick={hasUserLiked ? removeLike : addLike}>
-          {hasUserLiked ? <>&#128078;</> : <>&#128077;</>}{" "}
-        </button>
-        {likes && <p> Likes: {likes?.length} </p>}
+        <div className="title likes red">
+          <button onClick={hasUserLiked ? removeLike : addLike}>
+            {hasUserLiked ? <>&#128078;</> : <>&#128077;</>}{" "}
+          </button>
+          {likes && <span> Likes: {likes?.length} </span>}
+          {user?.uid === post.userId && <button onClick={deletePost}>Delete</button>}
+        </div>
       </div>
 
-      <div>
-        {comments?.map((comment: Comment) => (
-          <div>{`${comment.name}: ${comment.comment}`}</div>
+      <div className="yellow">
+        {comments.map((comment: Comment) => (
+          <div>
+            <span>{`${comment.name}: ${comment.comment}`}</span>
+            <span>{comment.userId === user?.uid && <button onClick={() => deleteComment(comment.commentId)}>Delete</button>}</span>
+          </div>
         ))
         }
       </div>
