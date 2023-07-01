@@ -15,6 +15,8 @@ import { Post as IPost } from "./main";
 import { set } from "react-hook-form";
 import { FaTrashAlt, FaThumbsUp, FaThumbsDown } from "react-icons/fa";
 import { BiSolidSend } from "react-icons/bi";
+import TextareaAutosize from 'react-textarea-autosize';
+import { IoPersonAdd, IoPersonRemove } from "react-icons/io5";
 
 interface Props {
   post: IPost;
@@ -242,56 +244,64 @@ export const Post = (props: Props) => {
 
   return (
     <div className="main">
-      <div className="title red">
-        <h1> {post.title}</h1>
-      </div>
-
-      <div>
-        <img className="image" src={post?.downloadURL} />
-      </div>
-
-      <div className="body">
-        <p> {post.description} </p>
+      
+      <div className="post orange">
+        <div className="title red">
+          <h1> {post.title}</h1>
+        </div>
+        <div>
+          <img className="image" src={post?.downloadURL} />
+        </div>
+        <div className="body">
+          <p> {post.description} </p>
+        </div>
       </div>
       
-      <div className="yellow likes">
+      <div className="yellow post-info curve">
         <div className="username-section">
           <span>@{post.username}</span>
-          {post.userId !== user?.uid && <button onClick={following ? unfollow : follow}>{following ? <>Unfollow</> : <>Follow</>}</button>}
+          { post.userId !== user?.uid &&
+          <span 
+            // className="follow"
+            onClick={following ? unfollow : follow}>
+            {following ? <IoPersonRemove className="follow" /> : <IoPersonAdd className="cursor" />}
+          </span>
+          }
         </div>
         <div className="likes-section">
           <span onClick={hasUserLiked ? removeLike : addLike}>
-            {hasUserLiked ? <FaThumbsDown /> : <FaThumbsUp />}{" "}
+            {hasUserLiked ? <FaThumbsDown className="cursor" /> : <FaThumbsUp className="cursor" />}{" "}
           </span>
           {likes && <span>Likes: {likes?.length}</span>}
-          {user?.uid === post.userId && <FaTrashAlt onClick={deletePost} />}
+          {user?.uid === post.userId && <FaTrashAlt className="cursor" onClick={deletePost} />}
         </div>
       </div>
 
-      <div className="comment yellow">
-        {comments.map((comment: Comment) => (
-          <div key={comment.commentId} className="single-comment">
-            <div>{`${comment.name}: ${comment.comment}`}</div>
-            <>{console.log(`commment ${comment.comment} commentId is ${comment.commentId}`)}</>
-            <div style={{margin: "5px"}}>{comment.userId === user?.uid && <FaTrashAlt onClick={() => deleteComment(comment.commentId)}/>}</div>
-          </div>
-        ))
-        }
+      <div className="comment-section curve orange">
+        <div className="comment-list">
+          {comments.map((comment: Comment) => (
+            <div key={comment.commentId} className="single-comment">
+              <div>{`${comment.name}: ${comment.comment}`}</div>
+              <>{console.log(`commment ${comment.comment} commentId is ${comment.commentId}`)}</>
+              <div style={{margin: "5px"}}>{comment.userId === user?.uid && <FaTrashAlt className="cursor" onClick={() => deleteComment(comment.commentId)}/>}</div>
+            </div>
+          ))
+          }
+        </div>
+        {auth.currentUser &&
+        <div className="comment-input">
+          <TextareaAutosize
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
+            placeholder="Comment..."
+          />
+            <BiSolidSend
+              // tabIndex={0}
+              className="send-container cursor"
+              onClick={() => addComment(post.id, comment, auth?.currentUser?.displayName ?? "")} />
+        </div>}
       </div>
 
-      {auth.currentUser &&
-      <div className="write_comment">
-        <textarea 
-          value={comment}
-          onChange={(e) => setComment(e.target.value)} 
-          placeholder="Comment...">
-        </textarea>
-          <BiSolidSend
-            // tabIndex={0}
-            className="send-container"
-            onClick={() => addComment(post.id, comment, auth?.currentUser?.displayName ?? "")} />
-      </div>
-      }
     </div>
   );
 };
