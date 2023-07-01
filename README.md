@@ -2,7 +2,7 @@
 
 Started this site off of a react course on youtube. Excellent teaching from a guy the same age as me.
 
-Course playlist: https://www.youtube.com/watch?v=jUBc7K9XCcU&list=PLpPqplz6dKxW5ZfERUPoYTtNUNvrEebAR&index=1
+Course playlist: [https://www.youtube.com/watch?v=jUBc7K9XCcU&list=PLpPqplz6dKxW5ZfERUPoYTtNUNvrEebAR&index=1](https://www.youtube.com/watch?v=U2Wltnv-doo&list=PLpPqplz6dKxW5ZfERUPoYTtNUNvrEebAR&index=1)
 
 Features the author created:
 - Logging in with google
