@@ -1,3 +1,12 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@700&family=League+Spartan:wght@100;700&family=Poppins&family=Roboto:wght@300;400;500;700&display=swap');
+
+html {
+  box-sizing: border-box;
+}
+*, *:before, *:after {
+  box-sizing: inherit;
+}
+
 .App {
   text-align: center;
 }
@@ -9,20 +18,69 @@ body {
 }
 
 .title {
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
   display: flex;
   flex-direction: row;
 }
 
 .likes {
+  display: flex;
+  justify-content: space-between;
+}
+
+.username-section, 
+.likes-section {
+  display: flex;
+  align-items: center;
+}
+
+.likes {
+  width: 50%;
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  display: flex;
+  flex-direction: row;
   height: 1.5em;
 }
 
-.comment {
+.write_comment {
+  font-family: 'Roboto', sans-serif;
+  font-family: 500;
   display: flex;
+  align-items: center;
   flex-direction: row;
   width: 50%;
   justify-content: center;
   background: red;
+}
+
+.comment {
+  font-family: 'Roboto', sans-serif;
+  font-family: 500;
+  display: flex;
+  flex-direction: column;
+  width: 50%;
+  justify-content: center;
+  background: red;
+}
+
+.send-container {
+  font-size: 2em;
+  transition: transform 0.2s;
+}
+
+.single-comment {
+  margin: 0.25em 0;
+}
+
+/* .send-container:focus {
+  outline: 2px solid black;
+  border-radius: 5px;
+} */
+
+.send-container:active {
+  transform: scale(0.8);
 }
 
 .main {
@@ -120,7 +178,7 @@ form {
 input,
 textarea {
   padding: 8px 10px;
-  margin: 3px 8px 16px 8px;
+  margin: 1em 1em;
   background-color: rgba(222, 239, 248, 0.877);
   border: 0px transparent;
   border-radius: 5px;
@@ -135,4 +193,5 @@ textarea {
 
 .image {
   max-width: 50%;
+  border-radius: 5%;
 }

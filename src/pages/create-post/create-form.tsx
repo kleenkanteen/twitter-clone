@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { addDoc, collection } from "firebase/firestore";
+import { doc, addDoc, collection, updateDoc } from "firebase/firestore";
 import { auth, db } from "../../config/firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useNavigate } from "react-router-dom";
@@ -65,12 +65,16 @@ export const CreateForm = () => {
       url = await uploadFileToStorage(file[0]);
     }
   
-    await addDoc(postsRef, {
+    const postSnapshot = await addDoc(postsRef, {
       ...rest,
       downloadURL: url,
       username: user?.displayName,
       userId: user?.uid,
     });
+
+    const postId = postSnapshot.id;
+    const postDocRef = doc(postsRef, postId);
+    await updateDoc(postDocRef, { postId: postId });
   
     navigate("/");
   };

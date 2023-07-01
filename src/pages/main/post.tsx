@@ -1,5 +1,6 @@
 import {
   addDoc,
+  updateDoc,
   collection,
   deleteDoc,
   doc,
@@ -12,6 +13,8 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import { auth, db } from "../../config/firebase";
 import { Post as IPost } from "./main";
 import { set } from "react-hook-form";
+import { FaTrashAlt, FaThumbsUp, FaThumbsDown } from "react-icons/fa";
+import { BiSolidSend } from "react-icons/bi";
 
 interface Props {
   post: IPost;
@@ -107,19 +110,26 @@ export const Post = (props: Props) => {
 
 
   const getComments = async () => {
+    console.log("function console.dir")
+    console.dir(getComments)
     const commentsRef = collection(db, "comments");
     const commentsQuery = query(commentsRef, where("postId", "==", post.id));
     const commentsSnapshot = await getDocs(commentsQuery);
     const commentsData = commentsSnapshot.docs.map((doc) => doc.data());
-    // console.log(`full doc.data() object: ${commentsData[0]}`)
-    const comments = commentsData.map((commentData) => ({
+    console.log("ALL COMMENTS")
+    console.dir({commentsData})
+    const allComments = commentsData.map((commentData) => ({
       postId: commentData.postId,
       comment: commentData.comment,
       commentId: commentData.commentId,
       name: commentData.name,
       userId: commentData.userId,
     }));
-    setComments(comments);
+    console.log(`we got the comments boss`)
+    console.dir({allComments})
+    setComments(() => allComments);
+    console.log("comments so far")
+    console.dir(comments)
   };
 
 
@@ -134,6 +144,10 @@ export const Post = (props: Props) => {
         userId: user?.uid
       });
 
+      const commentId = commentSnapshot.id;
+      const commentDocRef = doc(commentsRef, commentSnapshot.id);
+      await updateDoc(commentDocRef, { commentId: commentId });
+
       if (!user) return 
       // add to comments state variable
       setComments((comments) => ([
@@ -146,16 +160,17 @@ export const Post = (props: Props) => {
           userId: user.uid
         }
       ]))
+
+      setComment("")
     }
     catch (err) {
       console.log(err)
     }
   };
-  
-  const deleteComment = (commentId: string) => {
-    const commentsRef = collection(db, "comments");
-    console.log(`db is ${db} and ${commentId}`)
-    deleteDoc(doc(db, "comments", commentId));
+  const deleteComment = async (commentId: string) => {
+    // console.log(`db is ${db} and ${commentId}`)
+    // console.dir({ db, commentId }); // Print the db and commentId using console.dir()
+    await deleteDoc(doc(db, "comments", commentId));    
     setComments((prev) => prev && prev.filter((thing) => thing.commentId !== commentId))
   }
 
@@ -239,34 +254,42 @@ export const Post = (props: Props) => {
         <p> {post.description} </p>
       </div>
       
-      <div className="footer">
-        <div>
-          <span> @{post.username} </span>
-          { post.userId !== user?.uid && <button onClick={following ? unfollow : follow}>{following ? <>Unfollow</> : <>Follow</> }</button>}
+      <div className="yellow likes">
+        <div className="username-section">
+          <span>@{post.username}</span>
+          {post.userId !== user?.uid && <button onClick={following ? unfollow : follow}>{following ? <>Unfollow</> : <>Follow</>}</button>}
         </div>
-        <div className="title likes red">
-          <button onClick={hasUserLiked ? removeLike : addLike}>
-            {hasUserLiked ? <>&#128078;</> : <>&#128077;</>}{" "}
-          </button>
-          {likes && <span> Likes: {likes?.length} </span>}
-          {user?.uid === post.userId && <button onClick={deletePost}>Delete</button>}
+        <div className="likes-section">
+          <span onClick={hasUserLiked ? removeLike : addLike}>
+            {hasUserLiked ? <FaThumbsDown /> : <FaThumbsUp />}{" "}
+          </span>
+          {likes && <span>Likes: {likes?.length}</span>}
+          {user?.uid === post.userId && <FaTrashAlt onClick={deletePost} />}
         </div>
       </div>
 
-      <div className="yellow">
+      <div className="comment yellow">
         {comments.map((comment: Comment) => (
-          <div>
-            <span>{`${comment.name}: ${comment.comment}`}</span>
-            <span>{comment.userId === user?.uid && <button onClick={() => deleteComment(comment.commentId)}>Delete</button>}</span>
+          <div key={comment.commentId} className="single-comment">
+            <div>{`${comment.name}: ${comment.comment}`}</div>
+            <>{console.log(`commment ${comment.comment} commentId is ${comment.commentId}`)}</>
+            <div style={{margin: "5px"}}>{comment.userId === user?.uid && <FaTrashAlt onClick={() => deleteComment(comment.commentId)}/>}</div>
           </div>
         ))
         }
       </div>
 
       {auth.currentUser &&
-      <div className="comment">
-        <textarea onChange={(e) => setComment(e.target.value)} placeholder="Comment..."></textarea>
-        <button onClick={() => addComment(post.id, comment, auth?.currentUser?.displayName ?? "")}> Post </button>
+      <div className="write_comment">
+        <textarea 
+          value={comment}
+          onChange={(e) => setComment(e.target.value)} 
+          placeholder="Comment...">
+        </textarea>
+          <BiSolidSend
+            // tabIndex={0}
+            className="send-container"
+            onClick={() => addComment(post.id, comment, auth?.currentUser?.displayName ?? "")} />
       </div>
       }
     </div>
