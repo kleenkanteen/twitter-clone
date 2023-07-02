@@ -9,6 +9,7 @@ import {
   getDocs,
   query,
   where,
+  limit
 } from "firebase/firestore";
 import { useAuthState } from "react-firebase-hooks/auth";
 
@@ -40,7 +41,8 @@ export const Main = ({ home }: { home: boolean }) => {
 
     if (!home) {
       console.log("looking for all posts");
-      data = await getDocs(postsRef);
+      const postsQuery = query(postsRef, limit(10));
+      data = await getDocs(postsQuery);
     } 
     else {
       if (!user) {

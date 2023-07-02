@@ -7,6 +7,7 @@ import {
   getDocs,
   query,
   where,
+  limit
 } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
@@ -243,21 +244,20 @@ export const Post = (props: Props) => {
   }
 
   return (
-    <div className="main">
-      
-      <div className="post orange">
-        <div className="title red">
+    <div className="color-scheme main">
+      <div className="post color-scheme">
+        <div className="title">
           <h1> {post.title}</h1>
         </div>
         <div>
           <img className="image" src={post?.downloadURL} />
         </div>
-        <div className="body">
+        <div className="description">
           <p> {post.description} </p>
         </div>
       </div>
       
-      <div className="yellow post-info curve">
+      <div className="post-info curve color-scheme">
         <div className="username-section">
           <span>@{post.username}</span>
           { post.userId !== user?.uid &&
@@ -277,7 +277,7 @@ export const Post = (props: Props) => {
         </div>
       </div>
 
-      <div className="comment-section curve orange">
+      <div className="comment-section color-scheme">
         <div className="comment-list">
           {comments.map((comment: Comment) => (
             <div key={comment.commentId} className="single-comment">
