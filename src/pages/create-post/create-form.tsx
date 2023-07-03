@@ -81,15 +81,18 @@ export const CreateForm = () => {
   
 
   return (
-    <form onSubmit={handleSubmit(onCreatePost)}>
-      <input placeholder="Title..." {...register("title")} />
-      <p style={{ color: "red" }}> {errors.title?.message}</p>
-      <textarea placeholder="Description..." {...register("description")} />
-      <p style={{ color: "red" }}> {errors.description?.message}</p>
-      <span>Add image (optional)</span>
-      <input type="file" {...register("file")} />
-      <p style={{ color: "red" }}> {errors.file?.message}</p>
-      <input type="submit" className="submitForm" />
-    </form>
+    <div className="main color-scheme full-height-border flexbox-centered">
+      <form onSubmit={handleSubmit(onCreatePost)}>
+        <input placeholder="Title..." {...register("title")} />
+        <p style={{ color: "red" }}> {errors.title?.message}</p>
+        <textarea placeholder="Description..." {...register("description")} />
+        <p style={{ color: "red" }}> {errors.description?.message}</p>
+        <span className="label">Add image (optional):</span>
+        <label htmlFor="file-input" className="button-link">Choose File</label>
+        <input type="file" id="file-input" {...register("file")} />
+        <p style={{ color: "red" }}> {errors.file?.message}</p>
+        <input type="submit" className="submitForm button-link" />
+      </form>
+    </div>
   );
 };

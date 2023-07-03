@@ -12,7 +12,7 @@ html {
 }
 
 body {
-  background-color: #312e81;
+  background: rgb(0,5,69);
   margin: 0;
   padding: 0;
   font-family: Arial, Helvetica, sans-serif;
@@ -38,9 +38,6 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  /* width: 30%; */
-  /* background-color: red; */
-  /* border-radius: 5%; */
   gap: 0.75em;
   padding: 0 0.5em;
 }
@@ -71,13 +68,10 @@ body {
   flex-direction: row;
   justify-content: space-between;
   height: 2.5em;
-  /* border-radius: 5%; */
   margin: 5px;
-  /* padding: 0 0.1em; */
 }
 
 .comment-input {
-  /* background-color: #181a1b; */
   font-family: 'Roboto', sans-serif;
   font-family: 500;
   display: flex;
@@ -87,7 +81,6 @@ body {
   gap: 0.5em;
   justify-content: center;
   padding: 0 0 1em 0;
-  /* background: red; */
 }
 
 .white {
@@ -95,18 +88,15 @@ body {
 }
 
 .comment-section {
-  /* background: rgb(0,5,69); */
-  /* background: radial-gradient(circle, rgba(0,5,69,1) 0%, rgba(28,39,94,1) 0%, rgba(62,50,199,1) 100%);   */
+
   width: 100%;
   display: flex;
   flex-direction: column;
   gap: 1em;
-  /* height: 20em; */
   justify-content: center;
   align-items: center;
   max-width: 50%;
   border-radius: 10px;
-  /* padding: 1em 0; */
 }
 
 .comment-list {
@@ -116,7 +106,6 @@ body {
   flex-direction: column;
   width: 100%;
   justify-content: center;
-  /* background: red; */
 }
 
 .send-container {
@@ -125,7 +114,6 @@ body {
 }
 
 .single-comment {
-  /* margin: 0.25em 0; */
   padding: 0.5em 0;
   display: flex;
   flex-direction: row;
@@ -134,10 +122,6 @@ body {
   border-bottom: 1px solid white;
 }
 
-/* .send-container:focus {
-  outline: 2px solid black;
-  border-radius: 5px;
-} */
 
 .send-container:active {
   transform: scale(0.8);
@@ -145,7 +129,7 @@ body {
 
 .color-scheme { 
   background: rgb(0,5,69);
-  border: 2px solid #a1a1aa;
+  border: 2px solid white;
   color: white;
 }
 
@@ -153,20 +137,20 @@ body {
   width: 75%;
   margin: auto;
   padding-bottom: 2em;
-  /* margin-bottom: 2em; */
-  /* background: blue; */
   display: flex;
   flex-direction: column;
   align-items: center;
   border: none;
+  border-left: 2px solid white;
+  border-right: 2px solid white;
 }
 
 .post {
   display: flex;
   flex-direction: column;
   align-items: center;
-  max-width: 50%;
-  border-radius: 5%;
+  width: 50%;
+  border-radius: 15px;
   margin: 2em 0 0 0;
 }
 
@@ -195,11 +179,11 @@ body {
 .navbar {
   width: 100%;
   height: 5em;
-  background-color: #3730a3;
+  background: rgb(0,5,69);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  /* padding: 0 2em; */
+  border-bottom: 2px solid white;
 }
 
 .button-link {
@@ -208,7 +192,7 @@ body {
   padding: 0.75em 1em;
   border: 2px solid white;
   color: white;
-  background-color: #3730a3;
+  background: rgb(0,5,69);
   text-decoration: none;
   border-radius: 10px;
   text-decoration: none;
@@ -225,12 +209,10 @@ body {
   width: 20%;
 }
 
-
 .navbar .user {
   display: flex;
   justify-content: center;
   align-items: center;
-  /* margin-right: 50px; */
 }
 
 .user p {
@@ -250,26 +232,27 @@ body {
   justify-content: center;
 }
 form {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
   margin-top: 50px;
   padding: 30px 20px;
-  width: 320px;
-  border-radius: 7px;
-  background-color: white;
+  width: 50%;
+  border-radius: 10px;
+  border: 2px solid white;
   backdrop-filter: blur(5px);
-  background-color: rgba(43, 0, 255, 0.588);
   overflow: hidden;
+  gap: 0.25em;
 }
 
 input,
 textarea {
   font-family: "Roboto", sans-serif;
   padding: 0.75em 0 1em 1em;
-  /* margin: 0 0 1em 0;  */
   background: #e2e8f0;
-  /* background-color: rgba(222, 239, 248, 0.877); */
   border: 0px transparent;
-  border-radius: 5px;
-  /* color: rgb(97, 4, 184); */
+  border-radius: 15px;
   font-size: 16px;
   z-index: 1;
   width: 75%;
@@ -282,9 +265,41 @@ textarea {
 
 .image {
   max-width: 100%;
-  border-radius: 5%;
+  border-radius: 15px;
 }
 
 .orange {
   background-color: orange;
+}
+
+.full-height-border {
+  height: calc(100vh - 5em);
+}
+
+.height-border {
+  margin-top: 5em;
+}
+
+svg path {
+  fill: rgb(0,5,69);
+}
+
+.flexbox-centered {
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+  justify-content: center;
+  align-items: center;
+}
+
+#file-input {
+  position: absolute;
+  left: 0;
+  top: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.label {
+  margin-bottom: 1em;
 }
