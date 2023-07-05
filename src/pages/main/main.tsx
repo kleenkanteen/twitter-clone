@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { auth, db } from "../../config/firebase";
 import { Post } from "./post";
 import { Loading } from "./loading";
@@ -11,7 +11,8 @@ import {
   query,
   where,
   limit,
-  startAfter
+  startAfter,
+  orderBy
 } from "firebase/firestore";
 import { useAuthState } from "react-firebase-hooks/auth";
 import InfiniteScroll from 'react-infinite-scroller';
@@ -34,6 +35,7 @@ export const Main = ({ home }: { home: boolean }) => {
   const [user, isLoading] = useAuthState(auth);
 
   const [postsList, setPostsList] = useState<Post[] | null>(null);
+  const hasMore = useRef(true);
   const [followingList, setFollowingList] = useState<string[] | null>(null);
 
   // console.log(`goign home is ${home}`);
@@ -41,21 +43,24 @@ export const Main = ({ home }: { home: boolean }) => {
   const postsRef = collection(db, "posts");
   let postsQuery: any;
   let snapshot: any;
-  let lastDocPagination: any;
+  const lastDocPagination = useRef<any>();
   
   const getPosts = async () => {
     console.log(`current user is ${user?.displayName} ID is ${user?.uid}`)
+    if (!hasMore.current) return;
 
     if (!home) {
       console.log("looking for all posts");
-      if (!snapshot) {
-        postsQuery = query(postsRef, limit(2));
+      if (!lastDocPagination.current) {
+        console.log("snapshot empty, initial page load")
+        postsQuery = query(postsRef, orderBy('createdAt', 'desc'), limit(2));
       }
       else {
-        postsQuery = query(postsRef, startAfter(lastDocPagination), limit(2));
+        console.log("get next 2 elements")
+        postsQuery = query(postsRef, orderBy('createdAt', 'desc'), startAfter(lastDocPagination.current), limit(2));
       }
       snapshot = await getDocs(postsQuery);
-      lastDocPagination = snapshot.docs[snapshot.docs.length-1];
+      lastDocPagination.current = snapshot.docs[snapshot.docs.length-1];
     } 
     else {
       if (!user) {
@@ -82,58 +87,99 @@ export const Main = ({ home }: { home: boolean }) => {
       if (!resolvedFollowingList) return;
       const SubscribedPosts = query(postsRef, where("userId", "in", resolvedFollowingList));
       snapshot = await getDocs(SubscribedPosts);
-    }
+
+      // if (snapshot.empty) hasMore.current = false
+      }
+
     };
-    
-    // if (!postsList) setPostsList([]);
-    // let newPosts: Post[] = snapshot?.docs.map((doc: any) => ({ ...doc.data(), id: doc.id })) as Post[];
-    // const updatePostsList = (prev: Post[]) => {
-    //   // Perform your logic to update the state variable
-    //   const addPosts = [...prev, newPosts];
-    //   return addPosts;
-    // };
-    
-    let newPosts: Post[] = snapshot?.docs.map((doc: any) => ({ ...doc.data(), id: doc.id })) as Post[]
+    if (snapshot?.docs) {
+      if (snapshot.docs.length === 0) hasMore.current = false;
+      else hasMore.current = true;
+    }
+    else {
+      setPostsList([]);
+      hasMore.current = false;
+    }
+
+    let newPosts = snapshot?.docs.map((doc: any) => ({ ...doc.data(), id: doc.id })) as Post[]
 
     if (!postsList) setPostsList(newPosts)
-
     else {
-      setPostsList([...postsList, ...newPosts])
+      if (newPosts) setPostsList(prevPostsList => prevPostsList && [...prevPostsList, ...newPosts])
     }
-  };
-
-  const hasMorePosts = () => !snapshot.empty;
+  }
   
+  const observerTarget: any = useRef(null);
+
   useEffect(() => {
-    if (user) getPosts();
+    if (home) setPostsList(() => []);
+
+    const fetchPosts = async () => {
+      if (user && hasMore.current) {
+        await getPosts();
+      }
+    };
+  
+    fetchPosts();
   }, [home, user]);
+
+  const [isIntersecting, setIsIntersecting] = useState(false);
+
+  useEffect(() => {
+    let observer: any;
+    if (postsList) {
+      observer = new IntersectionObserver(
+        ([entry]) => {
+          setIsIntersecting(entry.isIntersecting);
+        }
+      , { threshold: 0 });
+  
+      // Initialize observerTarget.current with an empty div element if it's not set
+      if (!observerTarget.current) {
+        observerTarget.current = document.createElement('div');
+      }
+  
+      observer.observe(observerTarget.current);
+    }
+    return () => {
+      if (observer) return observer.disconnect();
+    };
+  }, [postsList]);
+
+  useEffect(() => {
+    let intervalId: any;
+    if (isIntersecting && hasMore.current) {
+      console.log("intersecting")
+      intervalId = setInterval(getPosts, 750); 
+    } else {
+      clearInterval(intervalId);
+    }
+    return () => clearInterval(intervalId);
+  }, [isIntersecting, hasMore.current]);
 
 
   if (isLoading) {
     return <Loading />
-  } 
-  if (!postsList && home) {
+  }
+
+  if (!postsList || (postsList?.length === 0 && home)) {
     return (
       <div className="color-scheme main full-height-border">
         <div className="button-link height-border">
           You follow no one
         </div>
+        <div className="footer" id="intersect" ref={observerTarget}></div>
       </div>
     )
   }
+ 
   return (
     <div className="posts full-height-border">
-      <InfiniteScroll
-        pageStart={0}
-        loadMore={getPosts}
-        hasMore={snapshot ? hasMorePosts() : false}
-        loader={<Loading />}
-      >
-          {postsList?.map((post) => (
-            <Post post={post} key={post.id} postsList={postsList} setPostsList={setPostsList} />
-          ))
-          }
-      </InfiniteScroll>
+        {postsList?.map((post) => (
+          <Post post={post} key={post.id} postsList={postsList} setPostsList={setPostsList} />
+        ))}
+      {isLoading && <p>Loading...</p>}
+      <div className="footer" id="intersect" ref={observerTarget}></div>
     </div>
   );
 }

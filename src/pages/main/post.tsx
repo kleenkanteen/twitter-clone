@@ -7,7 +7,8 @@ import {
   getDocs,
   query,
   where,
-  limit
+  limit,
+  serverTimestamp
 } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
@@ -18,6 +19,7 @@ import { FaTrashAlt, FaThumbsUp, FaThumbsDown } from "react-icons/fa";
 import { BiSolidSend } from "react-icons/bi";
 import TextareaAutosize from 'react-textarea-autosize';
 import { IoPersonAdd, IoPersonRemove } from "react-icons/io5";
+import { Loading } from "./loading";
 
 interface Props {
   post: IPost;
@@ -119,8 +121,8 @@ export const Post = (props: Props) => {
     const commentsQuery = query(commentsRef, where("postId", "==", post.id));
     const commentsSnapshot = await getDocs(commentsQuery);
     const commentsData = commentsSnapshot.docs.map((doc) => doc.data());
-    console.log("ALL COMMENTS")
-    console.dir({commentsData})
+    // console.log("ALL COMMENTS")
+    // console.dir({commentsData})
     const allComments = commentsData.map((commentData) => ({
       postId: commentData.postId,
       comment: commentData.comment,
@@ -128,11 +130,11 @@ export const Post = (props: Props) => {
       name: commentData.name,
       userId: commentData.userId,
     }));
-    console.log(`we got the comments boss`)
-    console.dir({allComments})
+    // console.log(`we got the comments boss`)
+    // console.dir({allComments})
     setComments(() => allComments);
-    console.log("comments so far")
-    console.dir(comments)
+    // console.log("comments so far")
+    // console.dir(comments)
   };
 
 
@@ -144,7 +146,8 @@ export const Post = (props: Props) => {
         postId: postId,
         comment: comment,
         name: name,
-        userId: user?.uid
+        userId: user?.uid,
+        createdAt: serverTimestamp()
       });
 
       const commentId = commentSnapshot.id;
@@ -240,7 +243,7 @@ export const Post = (props: Props) => {
   }
 
   if (isLoading) {
-    return <div><svg width="72" height="72" stroke="#000" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g><circle cx="12" cy="12" r="9.5" fill="none" stroke-width="3" stroke-linecap="round"><animate attributeName="stroke-dasharray" dur="1.5s" calcMode="spline" values="0 150;42 150;42 150;42 150" keyTimes="0;0.475;0.95;1" keySplines="0.42,0,0.58,1;0.42,0,0.58,1;0.42,0,0.58,1" repeatCount="indefinite"/><animate attributeName="stroke-dashoffset" dur="1.5s" calcMode="spline" values="0;-16;-59;-59" keyTimes="0;0.475;0.95;1" keySplines="0.42,0,0.58,1;0.42,0,0.58,1;0.42,0,0.58,1" repeatCount="indefinite"/></circle><animateTransform attributeName="transform" type="rotate" dur="2s" values="0 12 12;360 12 12" repeatCount="indefinite"/></g></svg></div>;
+    return <Loading />
   }
 
   return (

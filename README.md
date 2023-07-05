@@ -15,7 +15,10 @@ Features I added:
 - Ability to delete posts and comments
 - Follow other users
 - Home feed to see posts of followed users
+- Loading sign on page load
+- Infinite scroll using pagination 
 
 Touch ups I did:
 - Nice looking icons with react-icons
-- Nice looking website all around
+- Nice looking website with a blue and white theme
+- Centered navbar

@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { doc, addDoc, collection, updateDoc } from "firebase/firestore";
+import { doc, addDoc, collection, updateDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db } from "../../config/firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useNavigate } from "react-router-dom";
@@ -70,6 +70,7 @@ export const CreateForm = () => {
       downloadURL: url,
       username: user?.displayName,
       userId: user?.uid,
+      createdAt: serverTimestamp()
     });
 
     const postId = postSnapshot.id;

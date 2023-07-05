@@ -285,6 +285,11 @@ textarea {
   margin-top: 5em;
 }
 
+.footer {
+  height: 5em;
+  border-top: 2px solid white;
+}
+
 .flexbox-centered {
   display: flex;
   flex-direction: column;
@@ -294,9 +299,8 @@ textarea {
 }
 
 #file-input {
-  position: absolute;
-  left: 0;
-  top: 0;
+  height: 0;
+  width: 0;
   opacity: 0;
   cursor: pointer;
 }
