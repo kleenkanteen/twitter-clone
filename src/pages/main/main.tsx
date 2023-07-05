@@ -112,8 +112,7 @@ export const Main = ({ home }: { home: boolean }) => {
   const observerTarget: any = useRef(null);
 
   useEffect(() => {
-    if (home) setPostsList(() => []);
-
+    if (!home) hasMore.current = true;
     const fetchPosts = async () => {
       if (user && hasMore.current) {
         await getPosts();
