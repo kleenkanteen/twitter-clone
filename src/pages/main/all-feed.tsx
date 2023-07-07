@@ -30,8 +30,7 @@ export interface Follow {
   followingUserId: string;
 }
 
-// home prop means if only subscribing to followed users
-export const Main = ({ home }: { home: boolean }) => {
+export const AllFeed = () => {
   const [user, isLoading] = useAuthState(auth);
 
   const [postsList, setPostsList] = useState<Post[] | null>(null);
@@ -47,51 +46,18 @@ export const Main = ({ home }: { home: boolean }) => {
   
   const getPosts = async () => {
     console.log(`current user is ${user?.displayName} ID is ${user?.uid}`)
-    if (!hasMore.current) return;
-
-    if (!home) {
-      console.log("looking for all posts");
-      if (!lastDocPagination.current) {
-        console.log("snapshot empty, initial page load")
-        postsQuery = query(postsRef, orderBy('createdAt', 'desc'), limit(2));
-      }
-      else {
-        console.log("get next 2 elements")
-        postsQuery = query(postsRef, orderBy('createdAt', 'desc'), startAfter(lastDocPagination.current), limit(2));
-      }
-      snapshot = await getDocs(postsQuery);
-      lastDocPagination.current = snapshot.docs[snapshot.docs.length-1];
-    } 
+    console.log("looking for all posts");
+    if (!lastDocPagination.current) {
+      console.log("snapshot empty, initial page load")
+      postsQuery = query(postsRef, orderBy('createdAt', 'desc'), limit(2));
+    }
     else {
-      if (!user) {
-        console.log("home feed cannot show if not logged in");
-        return;
-      }
-      console.log("home feed only");
-      const followingRef = collection(db, "following");
-      // console.log(`current user ID is ${user?.uid}`);
-      const followerQuery = query(followingRef, where("FollowerUserId", "==", user?.uid));
-      const followingSnapshot: any = await getDocs(followerQuery);
-
-      if (!followingSnapshot.empty) {
-      // console.log(`following userID ${followingsnapshot.docs[0].data().FollowingUserId}`);
-        const followingPromises = await followingSnapshot.docs.map(async (doc: any) => {
-        console.log(`following userID ${doc.data().FollowingUserId}`);
-        return doc.data().FollowingUserId;
-      });
-
-      const resolvedFollowingList = await Promise.all(followingPromises);
-      setFollowingList(await followingPromises);
-
-      console.log(`Following list is ${resolvedFollowingList}`);
-      if (!resolvedFollowingList) return;
-      const SubscribedPosts = query(postsRef, where("userId", "in", resolvedFollowingList));
-      snapshot = await getDocs(SubscribedPosts);
-
-      // if (snapshot.empty) hasMore.current = false
-      }
-
-    };
+      console.log("get next 2 elements")
+      postsQuery = query(postsRef, orderBy('createdAt', 'desc'), startAfter(lastDocPagination.current), limit(2));
+    }
+    snapshot = await getDocs(postsQuery);
+    lastDocPagination.current = snapshot.docs[snapshot.docs.length-1];
+  
     if (snapshot?.docs) {
       if (snapshot.docs.length === 0) hasMore.current = false;
       else hasMore.current = true;
@@ -112,7 +78,7 @@ export const Main = ({ home }: { home: boolean }) => {
   const observerTarget: any = useRef(null);
 
   useEffect(() => {
-    if (!home) hasMore.current = true;
+    hasMore.current = true;
     const fetchPosts = async () => {
       if (user && hasMore.current) {
         await getPosts();
@@ -120,7 +86,7 @@ export const Main = ({ home }: { home: boolean }) => {
     };
   
     fetchPosts();
-  }, [home, user]);
+  }, [user]);
 
   const [isIntersecting, setIsIntersecting] = useState(false);
 
@@ -159,17 +125,6 @@ export const Main = ({ home }: { home: boolean }) => {
 
   if (isLoading) {
     return <Loading />
-  }
-
-  if (!postsList || (postsList?.length === 0 && home)) {
-    return (
-      <div className="color-scheme main full-height-border">
-        <div className="button-link height-border">
-          You follow no one
-        </div>
-        <div className="footer" id="intersect" ref={observerTarget}></div>
-      </div>
-    )
   }
  
   return (

@@ -1,24 +1,18 @@
 import {
-  addDoc,
-  updateDoc,
-  collection,
+  addDoc, collection,
   deleteDoc,
   doc,
   getDocs,
-  query,
-  where,
-  limit,
-  serverTimestamp
+  query, serverTimestamp, updateDoc, where
 } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { auth, db } from "../../config/firebase";
-import { Post as IPost } from "./main";
-import { set } from "react-hook-form";
-import { FaTrashAlt, FaThumbsUp, FaThumbsDown } from "react-icons/fa";
 import { BiSolidSend } from "react-icons/bi";
-import TextareaAutosize from 'react-textarea-autosize';
+import { FaThumbsDown, FaThumbsUp, FaTrashAlt } from "react-icons/fa";
 import { IoPersonAdd, IoPersonRemove } from "react-icons/io5";
+import TextareaAutosize from 'react-textarea-autosize';
+import { auth, db } from "../../config/firebase";
+import { Post as IPost } from "./all-feed";
 import { Loading } from "./loading";
 
 interface Props {
@@ -267,7 +261,7 @@ export const Post = (props: Props) => {
           <span 
             // className="follow"
             onClick={following ? unfollow : follow}>
-            {following ? <IoPersonRemove className="follow" /> : <IoPersonAdd className="cursor" />}
+            {following ? <IoPersonRemove className="cursor" /> : <IoPersonAdd className="cursor" />}
           </span>
           }
         </div>

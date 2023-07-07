@@ -51,12 +51,6 @@ body {
   width: 50%;
 }
 
-.follow {
-  font-size: .5em;
-  cursor: pointer;
-  margin-top: 1px;
-}
-
 .curve {
   border-radius: 10px;
 }
