@@ -49,11 +49,11 @@ export const AllFeed = () => {
     console.log("looking for all posts");
     if (!lastDocPagination.current) {
       console.log("snapshot empty, initial page load")
-      postsQuery = query(postsRef, orderBy('createdAt', 'desc'), limit(2));
+      postsQuery = query(postsRef, orderBy('createdAt', 'desc'), limit(3));
     }
     else {
-      console.log("get next 2 elements")
-      postsQuery = query(postsRef, orderBy('createdAt', 'desc'), startAfter(lastDocPagination.current), limit(2));
+      console.log("get next 3 elements")
+      postsQuery = query(postsRef, orderBy('createdAt', 'desc'), startAfter(lastDocPagination.current), limit(3));
     }
     snapshot = await getDocs(postsQuery);
     lastDocPagination.current = snapshot.docs[snapshot.docs.length-1];
@@ -91,8 +91,8 @@ export const AllFeed = () => {
   const [isIntersecting, setIsIntersecting] = useState(false);
 
   useEffect(() => {
-    let observer: any;
     if (postsList) {
+      let observer: any;
       observer = new IntersectionObserver(
         ([entry]) => {
           setIsIntersecting(entry.isIntersecting);
@@ -105,23 +105,17 @@ export const AllFeed = () => {
       }
   
       observer.observe(observerTarget.current);
+      return () => {
+        if (observer) return observer.disconnect();
+      };
     }
-    return () => {
-      if (observer) return observer.disconnect();
-    };
   }, [postsList]);
 
   useEffect(() => {
-    let intervalId: any;
     if (isIntersecting && hasMore.current) {
-      console.log("intersecting")
-      intervalId = setInterval(getPosts, 750); 
-    } else {
-      clearInterval(intervalId);
+      getPosts();
     }
-    return () => clearInterval(intervalId);
   }, [isIntersecting, hasMore.current]);
-
 
   if (isLoading) {
     return <Loading />

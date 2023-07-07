@@ -41,223 +41,98 @@ export const HomeFeed = () => {
   const hasMore = useRef(true);
   const lastDocPagination = useRef<any>();
   
-  const getFollowingList = async () => {
-    console.log("home feed only");
+  console.log("home feed only");
+
+  let followingSnapshot: any;
+
+  const getFollowingUsers = async () => {
     const followingRef = collection(db, "following");
-    // console.log(`current user ID is ${user?.uid}`);
     const followerQuery = query(followingRef, where("FollowerUserId", "==", user?.uid));
-    const followingSnapshot: any = await getDocs(followerQuery);
+    followingSnapshot = await getDocs(followerQuery);
 
     if (!followingSnapshot.empty) {
-    // console.log(`following userID ${followingsnapshot.docs[0].data().FollowingUserId}`);
-      const followingPromises = await followingSnapshot.docs.map(async (doc: any) => {
-      console.log(`following userID ${doc.data().FollowingUserId}`);
-      return doc.data().FollowingUserId;
-    });
-
-    const resolvedFollowingList = await Promise.all(followingPromises);
-    setFollowingList(await followingPromises);
-
-    console.log(`Following list is ${resolvedFollowingList}`);
-    if (!resolvedFollowingList) return;
-    const SubscribedPosts = query(postsRef, orderBy('createdAt', 'desc'), where("userId", "in", resolvedFollowingList));
-    snapshot = await getDocs(SubscribedPosts);
+      const resolvedFollowingList = followingSnapshot.docs.map((doc: any) => {
+        console.log(`following userID ${doc.data().FollowingUserId}`);
+        return doc.data().FollowingUserId;
+      });
+  
+      setFollowingList(() => resolvedFollowingList);
     }
   }
 
-  const getPosts = async () => {
-    console.log(`current user is ${user?.displayName} ID is ${user?.uid}`)
-
-    if (!user) {
-      console.log("home feed cannot show if not logged in");
-      return;
-    }
-
-    if (snapshot?.docs) {
-      if (snapshot.docs.length === 0) hasMore.current = false;
-      else hasMore.current = true;
-    }
-    else {
-      setPostsList([]);
+  const getSubscribedUsersPosts = async () => {
+    console.log("subbing");
+    if (!followingList || followingList.length === 0) return;
+    let SubscribedPosts = query(postsRef, orderBy('createdAt', 'desc'), where("userId", "in", followingList), limit(3))
+    if (lastDocPagination.current) SubscribedPosts = query(postsRef, orderBy('createdAt', 'desc'), where("userId", "in", followingList), limit(2), startAfter(lastDocPagination.current));
+    snapshot = await getDocs(SubscribedPosts);
+    
+    if (snapshot.docs.length === 0) {
       hasMore.current = false;
+    } else {
+      console.dir(snapshot.docs[0].data());
+      lastDocPagination.current = snapshot.docs[snapshot.docs.length - 1];
+      hasMore.current = true;
     }
-
-    let newPosts = snapshot?.docs.map((doc: any) => ({ ...doc.data(), id: doc.id })) as Post[]
-
-    if (!postsList) setPostsList(newPosts)
-    else {
-      if (newPosts) setPostsList(prevPostsList => prevPostsList && [...prevPostsList, ...newPosts])
-    }
+  
+    let newPosts = snapshot.docs.map((doc: any) => ({ ...doc.data(), id: doc.id })) as Post[];
+    console.log('prevPostsList:', postsList);
+    
+    setPostsList(prevPostsList => {
+      const updatedPostsList = [...(prevPostsList || []), ...newPosts];
+      console.log('updatedPostsList:', updatedPostsList);
+      return updatedPostsList;
+    });
+    return;
   }
   
-  // const observerTarget: any = useRef(null);
+  const observerTarget: any = useRef(null);
 
   useEffect(() => {
-    if (user) getFollowingList()
+    if (user) {
+      getFollowingUsers(); 
+  }
   }, [user]);
 
   useEffect(() => {
-    if (followingList) getPosts()
-  }, [followingList]);
+    if (followingList) {
+    const observer = new IntersectionObserver(
+      entries => {
+        // If the target element is in view and there are more posts to load
+        if (entries[0].isIntersecting && hasMore.current) {
+          console.log("intersecting");
+          getSubscribedUsersPosts();
+        }
+      },
+      { threshold: 0 } // Call the callback when the target element is fully in view
+    );
+  
+    if (observerTarget.current) {
+      observer.observe(observerTarget.current); // Start observing the target element
+    }
+
+    return () => observer.disconnect(); // Clean up the observer when the component unmounts
+  }
+  }, [followingList])
 
   if (isLoading) {
     return <Loading />
   }
 
-  if (!postsList || (postsList.length === 0)) {
-    return (
+  return (
+    <div className="posts full-height-border">
+      {!postsList || (postsList.length === 0) ? 
       <div className="color-scheme main full-height-border">
         <div className="button-link height-border">
           You follow no one
         </div>
       </div>
-    )
-  }
- 
-  return (
-    <div className="posts full-height-border">
-      <div>hello</div>
-        {postsList?.map((post) => (
+      : null}
+        {postsList && postsList?.length > 0 && postsList?.map((post) => (
           <Post post={post} key={post.id} postsList={postsList} setPostsList={setPostsList} />
         ))}
       {isLoading && <p>Loading...</p>}
-      <div className="footer"></div>
+      <div className="footer" id="intersect" ref={observerTarget}></div>
     </div>
   );
 }
-
-
-
-// export const HomeFeed = () => {
-//   const [user, isLoading] = useAuthState(auth);
-
-//   const [postsList, setPostsList] = useState<Post[] | null>(null);
-//   const hasMore = useRef(true);
-//   const [followingList, setFollowingList] = useState<string[] | null>(null);
-
-//   // console.log(`goign home is ${home}`);
-
-//   const postsRef = collection(db, "posts");
-//   let postsQuery: any;
-//   let snapshot: any;
-//   const lastDocPagination = useRef<any>();
-  
-//   const getPosts = async () => {
-//     console.log(`current user is ${user?.displayName} ID is ${user?.uid}`)
-//     if (!hasMore.current) return;
-
-//     if (!user) {
-//       console.log("home feed cannot show if not logged in");
-//       return;
-//     }
-
-//     console.log("home feed only");
-//     const followingRef = collection(db, "following");
-//     // console.log(`current user ID is ${user?.uid}`);
-//     const followerQuery = query(followingRef, where("FollowerUserId", "==", user?.uid));
-//     const followingSnapshot: any = await getDocs(followerQuery);
-
-//     if (!followingSnapshot.empty) {
-//     // console.log(`following userID ${followingsnapshot.docs[0].data().FollowingUserId}`);
-//       const followingPromises = await followingSnapshot.docs.map(async (doc: any) => {
-//       console.log(`following userID ${doc.data().FollowingUserId}`);
-//       return doc.data().FollowingUserId;
-//     });
-
-//     const resolvedFollowingList = await Promise.all(followingPromises);
-//     setFollowingList(await followingPromises);
-
-//     console.log(`Following list is ${resolvedFollowingList}`);
-//     if (!resolvedFollowingList) return;
-//     const SubscribedPosts = query(postsRef, where("userId", "in", resolvedFollowingList));
-//     snapshot = await getDocs(SubscribedPosts);
-
-//     }
-
-//     };
-//     if (snapshot?.docs) {
-//       if (snapshot.docs.length === 0) hasMore.current = false;
-//       else hasMore.current = true;
-//     }
-//     else {
-//       setPostsList([]);
-//       hasMore.current = false;
-//     }
-
-//     let newPosts = snapshot?.docs.map((doc: any) => ({ ...doc.data(), id: doc.id })) as Post[]
-
-//     if (!postsList) setPostsList(newPosts)
-//     else {
-//       if (newPosts) setPostsList(prevPostsList => prevPostsList && [...prevPostsList, ...newPosts])
-//     }
-  
-//   const observerTarget: any = useRef(null);
-
-//   useEffect(() => {
-//     const fetchPosts = async () => {
-//       if (user && hasMore.current) {
-//         await getPosts();
-//       }
-//     };
-//     fetchPosts();
-//   }, [user]);
-
-//   const [isIntersecting, setIsIntersecting] = useState(false);
-
-//   useEffect(() => {
-//     let observer: any;
-//     if (postsList) {
-//       observer = new IntersectionObserver(
-//         ([entry]) => {
-//           setIsIntersecting(entry.isIntersecting);
-//         }
-//       , { threshold: 0 });
-  
-//       // Initialize observerTarget.current with an empty div element if it's not set
-//       if (!observerTarget.current) {
-//         observerTarget.current = document.createElement('div');
-//       }
-  
-//       observer.observe(observerTarget.current);
-//     }
-//     return () => {
-//       if (observer) return observer.disconnect();
-//     };
-//   }, [postsList]);
-
-//   useEffect(() => {
-//     let intervalId: any;
-//     if (isIntersecting && hasMore.current) {
-//       console.log("intersecting")
-//       intervalId = setInterval(getPosts, 750); 
-//     } else {
-//       clearInterval(intervalId);
-//     }
-//     return () => clearInterval(intervalId);
-//   }, [isIntersecting, hasMore.current]);
-
-//   if (isLoading) {
-//     return <Loading />
-//   }
-
-//   if (!postsList || (postsList.length === 0)) {
-//     return (
-//       <div className="color-scheme main full-height-border">
-//         <div className="button-link height-border">
-//           You follow no one
-//         </div>
-//         <div className="footer" id="intersect" ref={observerTarget}></div>
-//       </div>
-//     )
-//   }
- 
-//   return (
-//     <div className="posts full-height-border">
-//         {postsList?.map((post) => (
-//           <Post post={post} key={post.id} postsList={postsList} setPostsList={setPostsList} />
-//         ))}
-//       {isLoading && <p>Loading...</p>}
-//       <div className="footer" id="intersect" ref={observerTarget}></div>
-//     </div>
-//   );
-// }
