@@ -79,6 +79,7 @@ export const AllFeed = () => {
 
   useEffect(() => {
     hasMore.current = true;
+    if (!user) getPosts();
     const fetchPosts = async () => {
       if (user && hasMore.current) {
         await getPosts();
