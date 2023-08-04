@@ -22,3 +22,31 @@ Touch ups I did:
 - Nice looking icons with react-icons
 - Nice looking website with a blue and white theme
 - Centered navbar
+
+# Deploy Instructions
+
+The course playlist has a video that shows how to create a Firebase project. The services you will use are: a Firestore database, authentication, and storage. The database security rules is this:
+
+```
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read: if true;
+      allow write, update: if request != null && request.resource.data.userId == request.auth.uid;
+      allow delete: if request.auth != null && resource.data.userId == request.auth.uid;
+    }
+    
+    match /comments/{commentId} {
+      allow write, update: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow delete: if request.auth != null && resource.data.userId == request.auth.uid;
+    }
+    
+    match /following/{followingId} {
+      allow write: if request.auth != null && request.resource.data.FollowerUserId == request.auth.uid;
+      allow delete: if request.auth != null && resource.data.FollowerUserId == request.auth.uid;
+    }
+  }
+}
+```
