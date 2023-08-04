@@ -50,3 +50,22 @@ service cloud.firestore {
   }
 }
 ```
+
+The storage security rules is this:
+
+```
+rules_version = '2';
+
+// Craft rules based on data in your Firestore database
+// allow write: if firestore.get(
+//    /databases/(default)/documents/users/$(request.auth.uid)).data.isAdmin;
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /{allPaths=**} {
+      allow read: if request.auth != null;
+      allow write: if false;
+      allow write: if request.resource.size < 5 * 1024 * 1024 && request.auth != null;
+    }
+  }
+}
+```
