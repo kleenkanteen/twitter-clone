@@ -1,22 +1,16 @@
 {
-  "name": "episode1",
-  "version": "0.1.0",
+  "name": "twitter-clone",
+  "version": "1.0",
   "private": true,
   "dependencies": {
     "@hookform/resolvers": "^2.9.7",
-    "@testing-library/jest-dom": "^5.16.5",
-    "@testing-library/react": "^13.3.0",
-    "@testing-library/user-event": "^13.5.0",
-    "@types/jest": "^27.5.2",
     "@types/node": "^16.11.56",
-    "@types/react-infinite-scroller": "^1.2.3",
     "firebase": "^9.22.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-firebase-hooks": "^5.0.3",
     "react-hook-form": "^7.34.2",
     "react-icons": "^4.10.1",
-    "react-infinite-scroller": "^1.2.6",
     "react-router-dom": "^6.3.0",
     "react-scripts": "5.0.1",
     "react-textarea-autosize": "^8.5.0",
@@ -29,12 +23,6 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
   },
   "browserslist": {
     "production": [

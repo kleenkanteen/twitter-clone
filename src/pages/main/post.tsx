@@ -17,7 +17,6 @@ import { Loading } from "./loading";
 
 interface Props {
   post: IPost;
-  postsList: IPost[] | null;
   setPostsList: React.Dispatch<React.SetStateAction<IPost[] | null>>;
 }
 
@@ -39,7 +38,7 @@ export const Post = (props: Props) => {
 
   const { post } = props;
   // console.log(post);
-  const [postsList, setPostsList] = [props.postsList, props.setPostsList]
+  const setPostsList = props.setPostsList
   const [user] = useAuthState(auth);
 
   const [likes, setLikes] = useState<Like[] | null>(null);
@@ -110,7 +109,7 @@ export const Post = (props: Props) => {
 
   const getComments = async () => {
     // console.log("function console.dir")
-    console.dir(getComments)
+    // console.dir(getComments)
     const commentsRef = collection(db, "comments");
     const commentsQuery = query(commentsRef, where("postId", "==", post.id));
     const commentsSnapshot = await getDocs(commentsQuery);

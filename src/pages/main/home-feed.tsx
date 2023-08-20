@@ -3,10 +3,7 @@ import { auth, db } from "../../config/firebase";
 import { Post } from "./post";
 import { Loading } from "./loading";
 import {
-  addDoc,
   collection,
-  deleteDoc,
-  doc,
   getDocs,
   query,
   where,
@@ -15,7 +12,6 @@ import {
   orderBy
 } from "firebase/firestore";
 import { useAuthState } from "react-firebase-hooks/auth";
-import InfiniteScroll from 'react-infinite-scroller';
 
 export interface Post {
   id: string;
@@ -129,7 +125,7 @@ export const HomeFeed = () => {
       </div>
       : null}
         {postsList && postsList?.length > 0 && postsList?.map((post) => (
-          <Post post={post} key={post.id} postsList={postsList} setPostsList={setPostsList} />
+          <Post post={post} key={post.id} setPostsList={setPostsList} />
         ))}
       {isLoading && <p>Loading...</p>}
       <div className="footer" id="intersect" ref={observerTarget}></div>

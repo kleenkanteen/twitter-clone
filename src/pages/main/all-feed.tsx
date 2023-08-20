@@ -1,21 +1,17 @@
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef } from "react";
 import { auth, db } from "../../config/firebase";
 import { Post } from "./post";
 import { Loading } from "./loading";
 import {
-  addDoc,
   collection,
-  deleteDoc,
   doc,
   getDocs,
   query,
-  where,
   limit,
   startAfter,
   orderBy
 } from "firebase/firestore";
 import { useAuthState } from "react-firebase-hooks/auth";
-import InfiniteScroll from 'react-infinite-scroller';
 
 export interface Post {
   id: string;
@@ -125,7 +121,7 @@ export const AllFeed = () => {
   return (
     <div className="posts full-height-border">
         {postsList?.map((post) => (
-          <Post post={post} key={post.id} postsList={postsList} setPostsList={setPostsList} />
+          <Post post={post} key={post.id} setPostsList={setPostsList} />
         ))}
       {isLoading && <p>Loading...</p>}
       <div className="footer" id="intersect" ref={observerTarget}></div>
