@@ -30,7 +30,10 @@ What I learned:
 
 # Deploy Instructions
 
-The course playlist has a video that shows how to create a Firebase project. The services you will use are: a Firestore database, authentication, and storage. The database security rules is this:
+The course playlist has a video that shows how to create a Firebase project. The services you will use are: a Firestore database, authentication, and storage. After setting up these services in the firebase console, in the terminal run `npm run build` then `firebase deploy` to upload the project to firebase hosting.
+
+
+Database security rules:
 
 ```
 rules_version = '2';
@@ -56,7 +59,7 @@ service cloud.firestore {
 }
 ```
 
-The storage security rules is this:
+Storage security rules:
 
 ```
 rules_version = '2';
@@ -68,7 +71,7 @@ service firebase.storage {
   match /b/{bucket}/o {
     match /{allPaths=**} {
       allow read: if request.auth != null;
-      allow write: if false;
+      allow write: if request.auth != null;
       allow write: if request.resource.size < 5 * 1024 * 1024 && request.auth != null;
     }
   }
