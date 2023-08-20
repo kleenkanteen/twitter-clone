@@ -45,14 +45,14 @@ export const AllFeed = () => {
   const lastDocPagination = useRef<any>();
   
   const getPosts = async () => {
-    console.log(`current user is ${user?.displayName} ID is ${user?.uid}`)
-    console.log("looking for all posts");
+    // console.log(`current user is ${user?.displayName} ID is ${user?.uid}`)
+    // console.log("looking for all posts");
     if (!lastDocPagination.current) {
-      console.log("snapshot empty, initial page load")
+      // console.log("snapshot empty, initial page load")
       postsQuery = query(postsRef, orderBy('createdAt', 'desc'), limit(3));
     }
     else {
-      console.log("get next 3 elements")
+      // console.log("get next 3 elements")
       postsQuery = query(postsRef, orderBy('createdAt', 'desc'), startAfter(lastDocPagination.current), limit(3));
     }
     snapshot = await getDocs(postsQuery);

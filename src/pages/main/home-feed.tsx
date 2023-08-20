@@ -41,7 +41,7 @@ export const HomeFeed = () => {
   const hasMore = useRef(true);
   const lastDocPagination = useRef<any>();
   
-  console.log("home feed only");
+  // console.log("home feed only");
 
   let followingSnapshot: any;
 
@@ -52,7 +52,7 @@ export const HomeFeed = () => {
 
     if (!followingSnapshot.empty) {
       const resolvedFollowingList = followingSnapshot.docs.map((doc: any) => {
-        console.log(`following userID ${doc.data().FollowingUserId}`);
+        // console.log(`following userID ${doc.data().FollowingUserId}`);
         return doc.data().FollowingUserId;
       });
   
@@ -61,7 +61,7 @@ export const HomeFeed = () => {
   }
 
   const getSubscribedUsersPosts = async () => {
-    console.log("subbing");
+    // console.log("subbing");
     if (!followingList || followingList.length === 0) return;
     let SubscribedPosts = query(postsRef, orderBy('createdAt', 'desc'), where("userId", "in", followingList), limit(3))
     if (lastDocPagination.current) SubscribedPosts = query(postsRef, orderBy('createdAt', 'desc'), where("userId", "in", followingList), limit(2), startAfter(lastDocPagination.current));
@@ -70,17 +70,17 @@ export const HomeFeed = () => {
     if (snapshot.docs.length === 0) {
       hasMore.current = false;
     } else {
-      console.dir(snapshot.docs[0].data());
+      // console.dir(snapshot.docs[0].data());
       lastDocPagination.current = snapshot.docs[snapshot.docs.length - 1];
       hasMore.current = true;
     }
   
     let newPosts = snapshot.docs.map((doc: any) => ({ ...doc.data(), id: doc.id })) as Post[];
-    console.log('prevPostsList:', postsList);
+    // console.log('prevPostsList:', postsList);
     
     setPostsList(prevPostsList => {
       const updatedPostsList = [...(prevPostsList || []), ...newPosts];
-      console.log('updatedPostsList:', updatedPostsList);
+      // console.log('updatedPostsList:', updatedPostsList);
       return updatedPostsList;
     });
     return;
@@ -100,7 +100,7 @@ export const HomeFeed = () => {
       entries => {
         // If the target element is in view and there are more posts to load
         if (entries[0].isIntersecting && hasMore.current) {
-          console.log("intersecting");
+          // console.log("intersecting");
           getSubscribedUsersPosts();
         }
       },

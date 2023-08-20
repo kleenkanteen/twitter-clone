@@ -109,7 +109,7 @@ export const Post = (props: Props) => {
 
 
   const getComments = async () => {
-    console.log("function console.dir")
+    // console.log("function console.dir")
     console.dir(getComments)
     const commentsRef = collection(db, "comments");
     const commentsQuery = query(commentsRef, where("postId", "==", post.id));
@@ -279,7 +279,7 @@ export const Post = (props: Props) => {
           {comments.map((comment: Comment) => (
             <div key={comment.commentId} className="single-comment">
               <div>{`${comment.name}: ${comment.comment}`}</div>
-              <>{console.log(`commment ${comment.comment} commentId is ${comment.commentId}`)}</>
+              {/* <>{console.log(`commment ${comment.comment} commentId is ${comment.commentId}`)}</> */}
               <div style={{margin: "5px"}}>{comment.userId === user?.uid && <FaTrashAlt className="cursor" onClick={() => deleteComment(comment.commentId)}/>}</div>
             </div>
           ))

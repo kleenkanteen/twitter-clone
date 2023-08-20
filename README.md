@@ -1,6 +1,6 @@
 # Overview
 
-Started this site off of a react course on youtube. Excellent teaching from a guy the same age as me.
+Started this project off of a react course on youtube. Excellent teaching from a guy the same age as me.
 
 Course playlist: [https://www.youtube.com/watch?v=jUBc7K9XCcU&list=PLpPqplz6dKxW5ZfERUPoYTtNUNvrEebAR&index=1](https://www.youtube.com/watch?v=U2Wltnv-doo&list=PLpPqplz6dKxW5ZfERUPoYTtNUNvrEebAR&index=1)
 
@@ -22,6 +22,11 @@ Touch ups I did:
 - Nice looking icons with react-icons
 - Nice looking website with a blue and white theme
 - Centered navbar
+
+What I learned:
+- That react state updates are asynchronous which can be a problem if you want to read a state right after updating it
+- How much of a pain pagination is using the intersection observer api and how little info exist online on it for react + firebase
+- SQL is better than noSQL for most data, which is probably relational
 
 # Deploy Instructions
 
