@@ -12,15 +12,7 @@ import {
   orderBy
 } from "firebase/firestore";
 import { useAuthState } from "react-firebase-hooks/auth";
-
-export interface Post {
-  id: string;
-  userId: string;
-  title: string;
-  username: string;
-  description: string;
-  downloadURL?: string;
-}
+import { IPost } from "./post";
 
 export interface Follow {
   followingUserId: string;
@@ -29,7 +21,7 @@ export interface Follow {
 export const AllFeed = () => {
   const [user, isLoading] = useAuthState(auth);
 
-  const [postsList, setPostsList] = useState<Post[] | null>(null);
+  const [postsList, setPostsList] = useState<IPost[] | null>(null);
   const hasMore = useRef(true);
   const [followingList, setFollowingList] = useState<string[] | null>(null);
 
@@ -63,7 +55,7 @@ export const AllFeed = () => {
       hasMore.current = false;
     }
 
-    let newPosts = snapshot?.docs.map((doc: any) => ({ ...doc.data(), id: doc.id })) as Post[]
+    let newPosts = snapshot?.docs.map((doc: any) => ({ ...doc.data(), id: doc.id })) as IPost[]
 
     if (!postsList) setPostsList(newPosts)
     else {

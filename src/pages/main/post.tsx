@@ -12,8 +12,18 @@ import { FaThumbsDown, FaThumbsUp, FaTrashAlt } from "react-icons/fa";
 import { IoPersonAdd, IoPersonRemove } from "react-icons/io5";
 import TextareaAutosize from 'react-textarea-autosize';
 import { auth, db } from "../../config/firebase";
-import { Post as IPost } from "./all-feed";
+import { Timestamp } from 'firebase/firestore';
 import { Loading } from "./loading";
+
+export interface IPost {
+  id: string;
+  userId: string;
+  title: string;
+  username: string;
+  description: string;
+  downloadURL?: string;
+  createdAt: Timestamp;
+}
 
 interface Props {
   post: IPost;
@@ -235,6 +245,13 @@ export const Post = (props: Props) => {
     setPostsList((prev) => prev && prev.filter((thing) => thing.id !== post.id))
   }
 
+  const getDate = () =>{
+    // Convert the Firebase Timestamp to a JavaScript Date object
+    const jsDate = post.createdAt.toDate();
+    return jsDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    // console.log(formattedDate);
+  }
+
   if (isLoading) {
     return <Loading />
   }
@@ -245,8 +262,11 @@ export const Post = (props: Props) => {
         <div className="title">
           <h1> {post.title}</h1>
         </div>
+        <div className="date flexbox-centered">
+          <p> {getDate()}</p>
+        </div>
         <div>
-          <img className="image" src={post?.downloadURL} />
+          {post.downloadURL && <img className="image" src={post.downloadURL} />}
         </div>
         <div className="description">
           <p> {post.description} </p>

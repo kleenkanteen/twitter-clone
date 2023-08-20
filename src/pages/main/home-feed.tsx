@@ -1,6 +1,6 @@
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef } from "react";
 import { auth, db } from "../../config/firebase";
-import { Post } from "./post";
+import { Post, IPost } from "./post";
 import { Loading } from "./loading";
 import {
   collection,
@@ -13,15 +13,6 @@ import {
 } from "firebase/firestore";
 import { useAuthState } from "react-firebase-hooks/auth";
 
-export interface Post {
-  id: string;
-  userId: string;
-  title: string;
-  username: string;
-  description: string;
-  downloadURL?: string;
-}
-
 export interface Follow {
   followingUserId: string;
 }
@@ -29,7 +20,7 @@ export interface Follow {
 export const HomeFeed = () => {
   const [user, isLoading] = useAuthState(auth);
 
-  const [postsList, setPostsList] = useState<Post[] | null>(null);
+  const [postsList, setPostsList] = useState<IPost[] | null>(null);
   const [followingList, setFollowingList] = useState<string[] | null>(null);
 
   const postsRef = collection(db, "posts");
@@ -71,7 +62,7 @@ export const HomeFeed = () => {
       hasMore.current = true;
     }
   
-    let newPosts = snapshot.docs.map((doc: any) => ({ ...doc.data(), id: doc.id })) as Post[];
+    let newPosts = snapshot.docs.map((doc: any) => ({ ...doc.data(), id: doc.id })) as IPost[];
     // console.log('prevPostsList:', postsList);
     
     setPostsList(prevPostsList => {
